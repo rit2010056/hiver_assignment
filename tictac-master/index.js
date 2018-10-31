@@ -19,15 +19,16 @@
  * 
  */
 const grid = [];
-const GRID_LENGTH = 3;
+const GRID_LENGTH = 5;
 let turn = 'X';
 
 var player = 1 
 // X -> 1 -> computer
 // O -> 2 -> player
 // 3 -> tie
+random_range = GRID_LENGTH-1
 
-var finished_counter = 0
+var total_move = 0
 // If finished counter is equal to 9 then game is finished
 
 /**
@@ -58,7 +59,7 @@ function initializeGrid() {
         player = 0    
         renderMainGrid();   
         addClickHandlers();
-        finished_counter = finished_counter + 1
+        total_move = total_move + 1
         player = 0
         console.log("next chance ",player)
     }
@@ -67,8 +68,8 @@ function initializeGrid() {
 function getComputerPosition () {
     check = true
     while(check){
-        x = getRandomInt(0,2)
-        y = getRandomInt(0,2)
+        x = getRandomInt(0,random_range)
+        y = getRandomInt(0,random_range)
         console.log("x,y is ",x,y)
         if (!grid[x][y]){
             check = false
@@ -176,6 +177,7 @@ function checkWinner(){
             break
         }
     }
+
     if (diagonal){
         if (winner!=0){
             for (let i = 0; i < GRID_LENGTH;i++) {  
@@ -204,7 +206,7 @@ function checkWinner(){
             col = GRID_LENGTH-1
             row = 0
             for (let i = 0; i < GRID_LENGTH;i++) {  
-                query_selector = document.querySelector('div[rowidx="'+i.toString()+'"][colidx="'+i.toString()+'"');
+                query_selector = document.querySelector('div[rowidx="'+row.toString()+'"][colidx="'+col.toString()+'"');
                 query_selector.classList.add('winnerColor')
                 row= row + 1
                 col = col -1
@@ -213,57 +215,70 @@ function checkWinner(){
         return winner
     }
 
-    if (finished_counter==9){
+    console.log("winner --- ",winner,total_move,GRID_LENGTH*GRID_LENGTH)
+    if (total_move==GRID_LENGTH*GRID_LENGTH){
         return 3
     }
 }
 
+function computer_turn(argument) {
+    list1 = getComputerPosition()
+    x = list1[0]
+    y = list1[1]
+    grid[x][y] = 1
+    renderMainGrid();
+    addClickHandlers();
+}
+
 function onBoxClick() {
     
+    //Computer turn
     if (player==1){
-        list1 = getComputerPosition()
-        x = list1[0]
-        y = list1[1]
-        grid[x][y] = 1
-        renderMainGrid();
-        addClickHandlers();
-        finished_counter = finished_counter + 1
+        computer_turn()
+        total_move = total_move + 1
         player = 0    
     }
     else{
         var rowIdx = this.getAttribute("rowIdx");
         var colIdx = this.getAttribute("colIdx");
+        //0->computer,2->player
         if (grid[colIdx][rowIdx]==0){
             grid[colIdx][rowIdx] = 2;
             renderMainGrid();
             addClickHandlers();
-            finished_counter = finished_counter + 1
+            total_move = total_move + 1
+            
+            console.log("total_move ",total_move)
+            if (total_move<GRID_LENGTH*GRID_LENGTH){
+                computer_turn()     
+                total_move = total_move + 1           
+            }
+            
+            if (!player){
+                console.log("next is computer chance")            
+            }
+            else{
+                console.log("next is player chance")            
+            }
+
+            winner = checkWinner()
+            if (winner==1){
+                alert("You Lose!!")
+                // if(!alert('Game Over!! app will be reloaded')){window.location.reload();}
+            }
+            else if (winner==2){
+                alert("You Won!!")
+                // if(!alert('Game Over!! app will be reloaded')){window.location.reload();}
+            }
+            else if (winner==3){
+                alert("Tie!!")
+                // if(!alert('Game Over!! app will be reloaded')){window.location.reload();}
+            }
+
         }
-        list1 = getComputerPosition()
-        x = list1[0]
-        y = list1[1]
-        grid[x][y] = 1
-        renderMainGrid();
-        addClickHandlers();
-        finished_counter = finished_counter + 1
-        player = 0    
-        
-        console.log("next chance ",player)
     }
 
-    winner = checkWinner()
-    if (winner==1){
-        alert("You Lose!!")
-        // if(!alert('Game Over!! app will be reloaded')){window.location.reload();}
-    }
-    else if (winner==2){
-        alert("You Won!!")
-        // if(!alert('Game Over!! app will be reloaded')){window.location.reload();}
-    }
-    else if (winner==3){
-        alert("Tie!!")
-        // if(!alert('Game Over!! app will be reloaded')){window.location.reload();}
-    }
+
 
 }
 
